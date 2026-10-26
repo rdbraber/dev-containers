@@ -16,5 +16,5 @@
   "containerEnv": {
     "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
   },
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude"
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude && mkdir -p /home/vscode/.claude/skills && cp -r /usr/local/share/claude-skills/. /home/vscode/.claude/skills/"
 }

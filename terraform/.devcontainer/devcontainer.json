@@ -2,8 +2,7 @@
   "name": "Claude Code",
   "build": { "dockerfile": "Dockerfile" },
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {},
-    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": { "username": "vscode" },
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {}
   },
@@ -18,7 +17,7 @@
   "containerEnv": {
     "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
   },
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude",
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude && mkdir -p /home/vscode/.claude/skills && cp -r /usr/local/share/claude-skills/. /home/vscode/.claude/skills/",
   "customizations": {
     "vscode": {
       "extensions": ["anthropic.claude-code", "hashicorp.terraform"],

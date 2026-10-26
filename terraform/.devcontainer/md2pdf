@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Convert a Markdown file to PDF with pandoc and Typst
+set -euo pipefail
+
+usage() {
+  echo "Usage: md2pdf input.md [output.pdf] [extra pandoc args...]" >&2
+  exit 1
+}
+
+[ $# -ge 1 ] || usage
+in=$1; shift
+[ -f "$in" ] || { echo "md2pdf: file not found: $in" >&2; usage; }
+
+out="${in%.*}.pdf"
+if [ $# -ge 1 ] && [[ $1 != -* ]]; then
+  out=$1; shift
+fi
+
+share=/usr/local/share/md2pdf
+
+# Remote images are downloaded here; --root=/ lets Typst read them (and any other file)
+media=$(mktemp -d)
+trap 'rm -rf "$media"' EXIT
+
+# commonmark_x reads Markdown the way GitHub does (alerts, emoji shortcodes, inline HTML);
+# fancy_lists is off because it stops task lists (- [x]) from being recognised
+pandoc "$in" -o "$out" \
+  --from=commonmark_x+autolink_bare_uris-fancy_lists \
+  --pdf-engine=typst \
+  --pdf-engine-opt=--root=/ \
+  --extract-media="$media" \
+  --template="$share/md2pdf.typst" \
+  --lua-filter="$share/md2pdf.lua" \
+  "$@"
+echo "$out"

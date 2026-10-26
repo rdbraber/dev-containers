@@ -6,10 +6,11 @@ so they need no `.devcontainer/` folder of their own.
 
 ## What's included
 
-- Ubuntu base image (`mcr.microsoft.com/devcontainers/base:ubuntu`)
-- Claude Code CLI and VS Code extension
-- Node.js, AWS CLI, Terraform, GitLab CLI (`glab`)
+- Ubuntu 26.04 (`ubuntu:26.04`) with the `common-utils` feature for the `vscode` user, zsh and Oh My Zsh
+- Claude Code CLI (native install, in `~/.local/bin`) and VS Code extension
+- AWS CLI, Terraform, GitLab CLI (`glab`)
 - VS Code Terraform extension, with format-on-save for `.tf` and `.tfvars`
+- Pandoc with Typst, the `md2pdf` command and a matching Claude Code skill
 
 ## Prerequisites
 
@@ -23,7 +24,10 @@ so they need no `.devcontainer/` folder of their own.
 | Path | Purpose |
 | --- | --- |
 | `.devcontainer/devcontainer.json` | Defines the image: base, features, extensions, settings |
-| `.devcontainer/Dockerfile` | Base image plus `glab` (via `install-glab.sh`) |
+| `.devcontainer/Dockerfile` | Ubuntu base, `glab` (via `install-glab.sh`), pandoc + Typst, Claude Code |
+| `.devcontainer/md2pdf` | Markdown to PDF wrapper, installed as `/usr/local/bin/md2pdf` |
+| `.devcontainer/md2pdf.lua`, `md2pdf.typst` | Pandoc filter and Typst template used by `md2pdf` |
+| `.devcontainer/skills/` | Claude Code skills, copied into `~/.claude/skills` on container create |
 | `project/.devcontainer.json` | Config `devc` uses to open other projects from the prebuilt image |
 
 ## Build the image
@@ -68,6 +72,28 @@ All containers share the `claude-code-config` volume. You log in to Claude Code 
 (run `claude`, then `/login`), and every project and rebuild keeps that login.
 
 `~/.aws` and `~/.ssh` must exist on the host, or the container won't start.
+
+## Markdown to PDF
+
+```sh
+md2pdf notes.md                 # writes notes.pdf next to it
+md2pdf notes.md out.pdf --toc   # extra arguments go to pandoc
+```
+
+Markdown is read the way GitHub reads it (`commonmark_x`): alerts (`> [!NOTE]` etc.) become
+coloured boxes, emoji shortcodes (`:rocket:`) and bare URLs work, and inline HTML such as
+`<sub>`, `<mark>`, `<kbd>` and `<details>` keeps its meaning. Remote images are downloaded.
+
+Defaults: A4, Noto Sans, left-aligned text. A `#` heading at the start (or the only one) becomes
+the title, and relative links (to files in the repo) are shown as plain text. Emoji and symbols
+are rendered in black and white with the Symbola font. Mermaid diagrams are drawn without a
+browser by the merman Typst package (baked into the image; most diagram types, not every
+Mermaid feature; an invalid diagram shows an error box). These are
+set in `.devcontainer/md2pdf.typst` (template) and `md2pdf.lua` (pandoc filter).
+
+The `md2pdf` skill tells Claude to use this command, so you can just ask Claude for a PDF of a
+Markdown file. Skills in `.devcontainer/skills/` are built into the image and copied into the
+shared `~/.claude/skills` volume each time a container is created.
 
 ## Applying changes
 

@@ -64,12 +64,15 @@ Mounts are applied when a container starts, not stored in the image. That is why
 
 | Host | Container | Mode |
 | --- | --- | --- |
-| Docker volume `claude-code-config` | `/home/vscode/.claude` | read-write |
+| `~/.claude-devcontainer` | `/home/vscode/.claude` | read-write |
 | `~/.aws` | `/home/vscode/.aws` | read-write |
 | `~/.ssh` | `/home/vscode/.ssh` | read-only |
 
-All containers share the `claude-code-config` volume. You log in to Claude Code once
-(run `claude`, then `/login`), and every project and rebuild keeps that login.
+All containers share `~/.claude-devcontainer`: Claude Code's login, settings, plugins,
+conversation history and memory. You log in once (run `claude`, then `/login`), and every
+project and rebuild keeps that login. It's a normal folder on the Mac, so Time Machine backs it
+up and Docker resets don't touch it. It's separate from the Mac's own `~/.claude`. It contains
+the Claude login token in plain text, so `initializeCommand` creates it with mode `700`.
 
 `~/.aws` and `~/.ssh` must exist on the host, or the container won't start.
 
@@ -93,7 +96,7 @@ set in `.devcontainer/md2pdf.typst` (template) and `md2pdf.lua` (pandoc filter).
 
 The `md2pdf` skill tells Claude to use this command, so you can just ask Claude for a PDF of a
 Markdown file. Skills in `.devcontainer/skills/` are built into the image and copied into the
-shared `~/.claude/skills` volume each time a container is created.
+shared `~/.claude/skills` folder each time a container is created.
 
 ## Applying changes
 

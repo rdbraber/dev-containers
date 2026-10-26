@@ -7,8 +7,9 @@
   "name": "Claude Code (project)",
   "image": "dev-containers:latest",
   "remoteUser": "vscode",
+  "initializeCommand": "mkdir -p \"${localEnv:HOME}/.claude-devcontainer\" && chmod 700 \"${localEnv:HOME}/.claude-devcontainer\"",
   "mounts": [
-    "source=claude-code-config,target=/home/vscode/.claude,type=volume",
+    "source=${localEnv:HOME}/.claude-devcontainer,target=/home/vscode/.claude,type=bind",
     // Host AWS config (read-write) and SSH config (read-only)
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws,target=/home/vscode/.aws,type=bind",
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"

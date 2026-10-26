@@ -7,9 +7,11 @@
     "ghcr.io/devcontainers/features/terraform:1": {}
   },
   "remoteUser": "vscode",
-  // Persist Claude Code login and settings across container rebuilds (shared with project containers)
+  // Claude Code login, settings and history live in ~/.claude-devcontainer on the host, shared by all
+  // containers and backed up with the Mac (initializeCommand creates it on the host if missing)
+  "initializeCommand": "mkdir -p \"${localEnv:HOME}/.claude-devcontainer\" && chmod 700 \"${localEnv:HOME}/.claude-devcontainer\"",
   "mounts": [
-    "source=claude-code-config,target=/home/vscode/.claude,type=volume",
+    "source=${localEnv:HOME}/.claude-devcontainer,target=/home/vscode/.claude,type=bind",
     // Host AWS config (read-write) and SSH config (read-only)
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws,target=/home/vscode/.aws,type=bind",
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"

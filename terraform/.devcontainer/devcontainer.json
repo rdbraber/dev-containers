@@ -1,0 +1,37 @@
+{
+  "name": "Claude Code",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {}
+  },
+  "remoteUser": "vscode",
+  // Persist Claude Code login and settings across container rebuilds (shared with project containers)
+  "mounts": [
+    "source=claude-code-config,target=/home/vscode/.claude,type=volume",
+    // Host AWS config (read-write) and SSH config (read-only)
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws,target=/home/vscode/.aws,type=bind",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
+  ],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+  },
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude",
+  "customizations": {
+    "vscode": {
+      "extensions": ["anthropic.claude-code", "hashicorp.terraform"],
+      "settings": {
+        "[terraform]": {
+          "editor.defaultFormatter": "hashicorp.terraform",
+          "editor.formatOnSave": true
+        },
+        "[terraform-vars]": {
+          "editor.defaultFormatter": "hashicorp.terraform",
+          "editor.formatOnSave": true
+        }
+      }
+    }
+  }
+}

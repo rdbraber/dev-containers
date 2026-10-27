@@ -27,6 +27,22 @@ ENV TYPST_PACKAGE_CACHE_PATH=/usr/local/share/typst/packages
 RUN printf '#import "@preview/merman:0.5.0": mermaid\n#mermaid("flowchart LR\\n A --> B")\n' > /tmp/m.typ \
     && typst compile /tmp/m.typ /tmp/m.pdf && rm /tmp/m.typ /tmp/m.pdf
 
+# Small DevOps utilities (jq and dig come with the common-utils feature) and pre-commit.
+# pre-commit goes into a virtualenv at Homebrew's path: git hooks installed on the Mac start
+# with #!/usr/local/opt/pre-commit/libexec/bin/python3, so the same hooks run here unchanged.
+# (Ubuntu's pre-commit package would pull in a full gcc toolchain via nodeenv.)
+ARG YQ_VERSION=4.54.1
+ARG PRE_COMMIT_VERSION=4.7.0
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      netcat-openbsd nmap shellcheck yamllint python3-venv \
+    && rm -rf /var/lib/apt/lists/* \
+    && python3 -m venv /usr/local/opt/pre-commit/libexec \
+    && /usr/local/opt/pre-commit/libexec/bin/pip install --no-cache-dir "pre-commit==${PRE_COMMIT_VERSION}" \
+    && ln -s /usr/local/opt/pre-commit/libexec/bin/pre-commit /usr/local/bin/pre-commit \
+    && curl -fsSL -o /usr/local/bin/yq \
+      "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_$(dpkg --print-architecture)" \
+    && chmod +x /usr/local/bin/yq
+
 # Claude Code, native install (no Node.js needed); installs into ~/.local
 USER vscode
 RUN curl -fsSL https://claude.ai/install.sh | bash && rm -rf /home/vscode/.claude

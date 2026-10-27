@@ -9,6 +9,8 @@ so they need no `.devcontainer/` folder of their own.
 - Ubuntu 26.04 (`ubuntu:26.04`) with the `common-utils` feature for the `vscode` user, zsh and Oh My Zsh
 - Claude Code CLI (native install, in `~/.local/bin`) and VS Code extension
 - AWS CLI, Terraform, GitLab CLI (`glab`)
+- Utilities: `jq`, `yq` (mikefarah), `dig`, `nc`, `nmap`, `shellcheck`, `yamllint`, `pre-commit`
+  (git hooks installed on the Mac also run in the container)
 - VS Code Terraform extension, with format-on-save for `.tf` and `.tfvars`
 - Pandoc with Typst, the `md2pdf` command and a matching Claude Code skill
 
@@ -95,8 +97,21 @@ Mermaid feature; an invalid diagram shows an error box). These are
 set in `.devcontainer/md2pdf.typst` (template) and `md2pdf.lua` (pandoc filter).
 
 The `md2pdf` skill tells Claude to use this command, so you can just ask Claude for a PDF of a
-Markdown file. Skills in `.devcontainer/skills/` are built into the image and copied into the
-shared `~/.claude/skills` folder each time a container is created.
+Markdown file.
+
+## Installing missing tools
+
+The `install-tool` skill lets Claude install a tool the image doesn't have when a task needs it.
+Claude asks first, prefers Ubuntu packages, then pinned official release binaries (checksum
+verified, into `~/.local/bin`), and never pipes unknown scripts into a shell. These installs are
+temporary: they're gone after **Rebuild Container**. Claude logs each one in
+`~/.claude/installed-tools.md` (on the Mac: `~/.claude-devcontainer/installed-tools.md`), so
+tools you keep needing show up there as candidates for the Dockerfile.
+
+## Skills
+
+Skills in `.devcontainer/skills/` (`md2pdf`, `install-tool`) are built into the image and copied
+into the shared `~/.claude/skills` folder each time a container is created.
 
 ## Applying changes
 
